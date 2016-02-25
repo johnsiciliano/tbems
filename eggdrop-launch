@@ -1,0 +1,71 @@
+#!/bin/bash
+#tBEMS = the Better Eggdrop Management Suite
+#Copyright (C) 2004 John Siciliano
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+#USA.
+
+
+check_root () {
+	if [ `whoami` = "root" ]; then
+		echo "You shouldn't be running eggdrops as root."
+		exit
+	fi
+if grep -q -i `whoami` /usr/share/eggdrop/.egglock; then
+	echo "You aren't allowed to run this program"
+	exit
+	fi
+
+	if [ ! -e $HOME/eggdrops/$BOTNAME ]; then
+		echo "That bot does not exist!"
+		exit
+	else dolaunch
+	fi
+}
+darusage () {
+	echo "USAGE:"
+	echo "eggdrop-launch [botname]"
+	echo "Launches tBEMS eggdrops without hassle"
+}
+dolaunch () {
+	echo Launching eggdrop
+	cd $HOME/eggdrops/$BOTNAME
+	if [ -e $HOME/eggdrops/$BOTNAME/$BOTNAME.user ]; then
+	echo "Bot has been run before"
+	echo "Running bot without -m flag"
+	./eggdrop eggdrop.conf > temp.out
+	elif  [ ! -e $HOME/eggdrops/$BOTNAME/$BOTNAME.user ]; then
+	./eggdrop -m eggdrop.conf > temp.out
+	fi
+	if [ ! -e $HOME/eggdrops/$BOTNAME/pid.$BOTNAME ]; then
+		echo "Error. Aborting. Check above output"
+		#cat temp.out
+		exit
+	fi	
+	cat temp.out
+	logger -p warning -t tBEMS `whoami` has run eggdrop-launch
+	rm -rf temp.out
+	echo [ OK ] Done
+	exit
+} 
+
+
+if [ ! -n "$1" ]; then
+	darusage
+	exit
+else
+	BOTNAME=$1
+	check_root
+fi

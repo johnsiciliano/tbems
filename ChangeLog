@@ -1,0 +1,80 @@
+tBEMS - the better Eggdrop Management Suite 
+Site: http://sourceforge.net/projects/tbems
+Email: enlightened@gmail.com
+Version 1.0
+		-Eggdrop-base-install
+			-Uses tar.bz2 and retrys once if download fails
+		-Eggdrop-install
+			-Fixed bug that didn't check right directory to 
+see if eggdrop was installed already
+Version 0.9 -   Eggdrop-install
+	-	Now verbosely displays the eggdrop remove
+	-	New backup system
+		- Checks to see if configuration is default
+		- Uses $HOME/eggdrops/backup as the backup directory
+		- No longer uses .bak extention
+		- Dies if someone attempts to install an eggdrop called backup
+	-  Eggdrop-conf
+		-Added vhost configuration option
+		-Dies if someone attempts to configure backup
+	- Package
+	Removed CHANGELOG in favor for ChangeLog
+
+
+Version 0.8 - 	Eggdrop-launch
+		- Removed not-working configuration error check
+		- Should work properly
+	      	
+		Eggdrop-conf
+		- Fixed a human error, where the crontab option would check for a non-existant 
+			configuration file.
+		- Minor cosmetic fixes
+		- Removed IPv6 option in eggdrop-conf because of eggdrop 1.6.16
+		- Now uses BOTNAME as nick and ident in configuration files.
+		
+		Edited all tools to use a new syslog format. 
+			- Updated eggdrop-lock to be compatible with this
+			- NOTICE: Old log entries will not be printed by eggdrop-lock
+		Install.sh
+			- Sleeps for 1 then head's CHANGELOG
+		Eggdrop-base-install
+		- Chowns all files in two commands instead of four.
+		- Sleeps for 3 before installing to give you a chance to cancel the process
+		
+		ALL RELEASES BEORE THIS ARE NO LONGER SUPPORTED
+		This will probably be the final beta release for a while.
+		Eventually I will get around to beta testing.
+		If any of you would like to beta test let me know.
+
+Version 0.7 - Modified eggdrop-conf
+		- Now implements eggdrop-lock
+		- Logs attempts, and is recognized by eggdrop-lock
+	      Modified eggdrop-lock
+		- Now checks for both /var/log/messages and /var/log/syslog
+	      Created and implemented eggdrop-launch
+ 
+Version 0.6 - Created, and implemented eggdrop-conf which was based on 
+	the original Dopa v1.0 by Dopamina. Changes to original Dopa source are 
+	included in the eggdrop-conf source.
+ 
+Version 0.5r1 - Now works with new eggdrop 1.6.16
+
+Version 0.5 - MAJOR bugfix release
+
+Version 0.4 - Created and implemented eggdrop-lock
+		- Added a feature to view logs
+		- Has to be done manually for security.
+		Eggdrop-install now logs.
+		Uses rm -R instead of rm -rf
+		
+
+Version 0.3r2 -
+ Fixed possible security issue that could be caused by 
+local users replacing the eggdrop tar gz file with a tampered one in 
+/tmp. Fixed by simply backing up the original, and getting a new one. 
+While doing that, it also fixed amounts of excess file copies in /tmp.
+Also added cleanup functions to delete the tar file, and directory in 
+/tmp.
+
+Version 0.3 - First public release
+

@@ -1,0 +1,120 @@
+#!/bin/bash
+#tBEMS = the Better Eggdrop Management Suite
+#Copyright (C) 2004 John Siciliano (enlightened@gmail.com)
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+#USA.
+
+
+#Stop it, you're making the script blush.
+#Check in the dobase function for variables you may have to change
+
+dochecks () { 
+if [ ! `whoami` = "root" ]; then
+	echo What are you trying to pull?
+	echo You have to be root to use this
+	exit 1
+elif [ -d /usr/share/eggdrop ]; then
+	removebase
+else
+	dobase
+fi
+}
+
+removebase () {
+	OPTIONS="Yes No"
+	echo It *looks* like /usr/share/eggdrop already exists
+	echo It may not be, would you like to delete the contents 
+	echo of /usr/share/eggdrop and install it over?
+	select opt in $OPTIONS; do
+if [ $opt = "Yes" ]; then
+	dobase
+elif [ $opt = "No" ]; then
+	echo "Cancelling re-installation"
+	exit 1
+else
+	echo "Choose 1 or 2" 
+	exit 1
+fi
+done
+}
+
+dobase () {
+	#Edit the following variables if need be
+	echo "Proceeding to install the eggdrop base files for tBEMS..."
+	echo "If you change your mind cancel at this time only"
+	sleep 3
+	EGGSOURCE="ftp://ftp.eggheads.org/pub/eggdrop/source/1.6/eggdrop1.6.17.tar.bz2"
+	GETTER="/usr/bin/wget"
+	VERSION="1.6.17" #MUST BE EXACT
+
+	#DO NOT EDIT BELOW
+
+
+	TEMPDIR="eggdrop$VERSION"
+	#Below is the actual program
+	if [ -e /tmp/eggdrop$VERSION.tar.bz2 ]; then
+	echo Old eggdrop$VERSION.tar.bz2 found, backing up.
+	mv /tmp/eggdrop$VERSION.tar.bz2 /tmp/eggdrop$VERSION.tar.bz2.bak
+	echo [ OK ] Old file is now in /tmp/eggdrop$VERSION.tar.bz2.bak
+	doegg
+	fi
+	cd /tmp
+	TARPATH=/bin/tar
+	if [ ! -e $GETTER ]; then
+	echo "The program $GETTER does not exist"
+	exit 1
+	elif [ ! -e $TARPATH ]; then
+	echo "Tar doesn't exist in $TARPATH"
+	exit 1
+	fi
+	$GETTER $EGGSOURCE
+	if [ ! -e $TEMPDIR.tar.bz2 ]; then
+	clear
+	echo "Download FAILED. Retrying"
+	sleep 3
+	$GETTER $EGGSOURCE
+	if [ ! -e $TEMPDIR.tar.bz2 ]; then
+	clear
+	echo "Download FAILED twice."
+	echo "The download server may be full"
+	echo "Re-run eggdrop-base-install or check for new version"
+	echo "Of TBEMS at http://sourceforge.net/projects/tbems"
+	exit 1
+	fi
+	fi
+	tar -xjvf $TEMPDIR.tar.bz2
+	cd $TEMPDIR
+	./configure --prefix=/usr/share/eggdrop
+	make config && make clean && make && make install
+	chown nobody:users /usr/share/eggdrop
+	chown -R nobody:users /usr/share/eggdrop/*
+	rm /usr/share/eggdrop/modules
+	rm /usr/share/eggdrop/eggdrop
+	mv /usr/share/eggdrop/eggdrop-$VERSION /usr/share/eggdrop/eggdrop
+	mv /usr/share/eggdrop/modules-$VERSION /usr/share/eggdrop/modules
+	echo Cleaning up
+	rm -R /tmp/eggdrop$VERSION
+	rm -r /tmp/eggdrop$VERSION.tar.bz2
+	echo [ OK ] We are done
+	if [ ! -e /usr/bin/eggdrop-install ]; then
+	echo But, the eggdrop-install script was not found
+	echo Make sure to install that.
+	fi
+	touch /usr/share/eggdrop/.egglock
+	exit
+}
+
+dochecks

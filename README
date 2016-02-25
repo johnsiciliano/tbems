@@ -1,0 +1,19 @@
+tBEMS Eggdrop Management suite
+http://sourceforge.net/projects/tbems
+Author: John Siciliano
+E-Mail: enlightened@gmail.com
+
+Do the following things to create a working install.
+Please note pay attention to the eggdrop-base-install
+and check for errors.
+
+ ./install.sh
+eggdrop-base-install
+
+Here's a short using eggdrop-lock documentation:
+
+eggdrop-lock view views the eggdrop lock file
+eggdrop-lock del [username] deletes a user from the eggdrop lock file
+eggdrop-lock add [username] adds a user to the lock file
+eggdrop-lock log Views eggdrop-install log
+eggdrop-lock flush Flushes the lock file

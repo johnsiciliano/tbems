@@ -1,0 +1,121 @@
+#!/bin/bash
+#
+#tBEMS = the Better Eggdrop Management Suite
+#Copyright (C) 2004 John Siciliano (enlightened@gmail.com)
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+#USA.
+
+
+
+EGGLOCK=/usr/share/eggdrop/.egglock
+
+if [ ! `whoami` = "root" ]; then
+echo This program is to be run by root only.
+exit
+fi
+
+darusage () {
+	echo "Usage; eggdrop-lock [add/view/del/flush/log] [user_name]"
+	echo "Creates and deletes locks for users"
+	echo "Who use eggdrop-install" 
+	echo "The log option displays a log of recent tBEMS tool executions"
+	echo "Part of tBEMS toolset"
+	}
+
+lockadd () {
+	if [ ! -n "$ARG" ]; then
+		darusage
+		exit
+	fi
+	if ! grep -q -i $ARG /etc/passwd; then
+		echo User not found.
+		exit
+	fi
+	if grep -q -i $ARG $EGGLOCK; then
+		echo User is already added.
+		exit
+	fi
+	echo Adding $ARG to locklist
+	echo $ARG >> $EGGLOCK
+	echo [ OK ]
+	}
+lockdel () {
+	if [ ! -n "$ARG" ]; then
+		darusage
+		exit
+	fi
+	if [ ! `whoami` = "root" ]; then
+	exit
+	fi
+	if ! grep -q -i $ARG $EGGLOCK; then
+	echo No such user added.
+	exit
+	fi
+	echo Deleting $ARG from locklist
+	grep -vi $ARG $EGGLOCK > $EGGLOCK'2'
+	mv $EGGLOCK'2' $EGGLOCK
+	echo [ OK ]
+	 }
+lockview () {
+	echo Current members on the eggdrop lock list are:
+	cat $EGGLOCK | more
+	}
+lockflush () {
+	if [ ! `whoami` = "root" ]; then
+	exit
+	fi
+	OPTIONS="Yes No"
+	echo "Are you sure you want to flush the lock file?"
+	select opt in $OPTIONS; do
+	if [ "$opt" = "Yes" ]; then
+		echo Flushing lockfile
+		echo "" > $EGGLOCK
+		echo [ OK ]
+		exit
+	elif [ "$opt" = "No" ]; then
+		echo Cancelling procedure
+		exit
+	else
+		echo Invalid Command
+	fi
+	done
+	}
+dolog () {
+	echo Here are the entries for the installer
+	if [ -e /var/log/messages ]; then
+	cat /var/log/messages | grep -i tBEMS
+	else
+	cat /var/log/syslog | grep -i tBEMS
+	fi
+}
+if [ ! -n "$1" ]; then
+	darusage
+elif [ "$1" = "add" ]; then
+	ARG=$2
+	lockadd
+fi
+if [ "$1" = "del" ]; then
+	ARG=$2
+	lockdel
+elif [ "$1" = "view" ]; then
+	lockview
+fi
+if [ "$1" = "flush" ]; then
+	lockflush
+fi
+if [ "$1" = "log" ]; then
+dolog
+fi

@@ -1,0 +1,132 @@
+#!/bin/bash
+#tBEMS = the Better Eggdrop Management Suite
+#Copyright (C) 2004 John Siciliano (enlightened@gmail.com)
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, 
+#USA.
+
+EGGDIR=$HOME/eggdrops/$1
+if [ "$1" = "backup" ]; then
+echo "Invalid eggdrop name"
+exit 0
+fi
+check_root () {
+	
+	if grep -q -i `whoami` /usr/share/eggdrop/.egglock; then
+	echo "You aren't allowed to run this program anymore"
+	exit
+	fi
+
+	if [ ! -d $HOME/eggdrops ]; then
+		mkdir $HOME/eggdrops
+	fi
+	if [ `whoami` = "root" ];
+	then
+	echo "You shouldn't install an eggdrop as root, or any super-user. It"
+	echo "is not safe."
+	exit
+	else
+	doegg
+	fi
+}
+darusage () {
+	echo "Usage: eggdrop-install [bot]"
+	echo "Eggdrop installer. Installs eggdrops for users."
+	exit
+}
+removegg() 
+{
+		OPTIONS="Yes No"
+		echo The bot in $EGGDIR is already installed
+		echo "Would you like to remove it?"
+		select opt in $OPTIONS; do
+		if [ "$opt" = "Yes" ];
+		then
+		echo Okay, saving backup of $EGGDIR/eggdrop.conf to
+		echo the backup directory
+		if [ ! -d $HOME/eggdrops/backup ]; then
+			mkdir $HOME/eggdrops/backup
+		fi
+		if diff /usr/share/eggdrop/eggdrop.conf $HOME/eggdrops/$BOTNAME/eggdrop.conf > /dev/null; then
+			echo "Configuration is default, skipping save"
+		else
+		cp $EGGDIR/eggdrop.conf $HOME/eggdrops/backup/$BOTNAME.conf
+		fi
+		sleep 2
+		echo [ OK ]
+		echo "Removing eggdrop..."
+		rm -Rv $HOME/eggdrops/$BOTNAME
+		echo
+		echo [ OK ] Eggdrop Removed
+		exit
+		elif [ "$opt" = "No" ];
+		then
+		echo Cancelling remove process.
+		exit
+		fi
+done
+}
+doegg(){
+		if [ -e $EGGDIR/$ARG ]; then
+			removegg
+		fi
+		mkdir $EGGDIR
+		echo Installing eggdrop on:
+		echo $EGGDIR
+		echo Linking eggdrop files...
+		ln -s /usr/share/eggdrop/eggdrop $EGGDIR
+		cp /usr/share/eggdrop/eggdrop.conf $EGGDIR
+		echo [ OK ]
+		echo Correcting permissions...
+		chmod 644 $EGGDIR/eggdrop.conf
+		echo [ OK ]
+		echo Linking modules directory
+		ln -s /usr/share/eggdrop/modules/ $EGGDIR
+		echo [ OK ]
+		echo Copying Scripts directory
+		cp -rf /usr/share/eggdrop/scripts/ $EGGDIR
+		echo [ OK ]
+		echo Copying text directory
+		cp -rf /usr/share/eggdrop/text $EGGDIR
+		echo [ OK ]
+		echo Making skeleton directories
+		mkdir $EGGDIR/logs
+		mkdir $EGGDIR/filesys
+		mkdir $EGGDIR/filesys/incoming
+		echo [ OK ]
+		echo Linking Language directory
+		ln -s /usr/share/eggdrop/language/ $EGGDIR
+		echo [ OK ]
+		echo Linking docs directory
+		ln -s /usr/share/eggdrop/doc $EGGDIR
+		echo [ OK ]
+		echo Linking the help directory
+		ln -s /usr/share/eggdrop/help $EGGDIR
+		echo [ OK ]
+		echo Please edit $EGGDIR/eggdrop.conf
+		echo "Thank for using tBEMS. http://tbems.sourceforge.net"
+		logger -p warning -t tBEMS `whoami` has run eggdrop-install
+	}
+	if [ ! -n "$1" ]; then
+		darusage
+	else
+		BOTNAME=$1
+		check_root
+	fi
+if [ "$1" = "backup" ]; then
+echo "Invalid eggdrop name"
+exit 0
+fi
+exit 0

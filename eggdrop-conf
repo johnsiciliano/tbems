@@ -1,0 +1,267 @@
+#!/bin/bash
+#tBEMS = the Better Eggdrop Management Suite
+#Copyright (C) 2004 John Siciliano (enlightened@gmail.com)
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+#USA.
+#
+#Based on DOPA 1.0 by Dopamina
+
+check_root () {
+	if grep -q -i `whoami` /usr/share/eggdrop/.egglock; then
+	echo "You aren't allowed to run this program"
+	exit
+	fi
+
+	if [ `whoami` = "root" ]; then
+		echo "You shouldn't be running eggdrops"
+		echo "as root"
+		exit
+	fi
+	if [ -e my.conf ]; then
+		rm -rf my.conf
+	fi
+	if [ ! -e $HOME/eggdrops/$BOTNAME ]; then
+		echo "Bot does not exist"
+		exit
+	else 
+	echo " [ OK ] Doing configuration for $HOME/eggdrops/$BOTNAME"
+	doconf
+	echo " [ OK ] Generated configuration file for $HOME/eggdrops/$BOTNAME"
+	fi
+}
+
+darusage () {
+	echo "eggdrop-conf [botname] "
+	echo "Interactively generates an eggdrop configuration file."
+	echo "Part of tBEMS toolset"
+}
+
+doconf () {
+	echo "Starting configuration for eggdrop."
+	username=$BOTNAME
+	cd $HOME/eggdrops/$BOTNAME
+	echo "Time zone, (e.g. PST EST CST)"
+	read zone
+	while [ "$zone" == "" ]
+	do
+		echo "Time Zone e.g. (PST EST CST)"
+		read zone
+	done
+	echo "Your E-mail:"
+	read email
+	while [ "$email" == "" ]
+	do
+	echo "Your E-mail:"
+	read email
+	done
+	echo "IRC Network name that your bot will be connecting to: "
+	read net
+	while [ "$net" == "" ]
+	do
+	echo "Network name: "
+	read net
+	done
+	botnick=$BOTNAME
+	echo "Listen port (press enter for default)"
+	read  port
+	if [ "$port" = "" ]; then
+	port=3333
+	fi
+
+
+	echo "IP Address to bind to. (Most Providers require you to use an IP)"
+	read ipv4
+	echo "V-Host to use"
+	read vhost
+	#set crontab
+	echo "Would you like to set crontab? [y/n]"
+	read cron
+	while [ "$cron" != "y" -a "$cron" != "n"  ]
+	do
+	echo "crontab [y/n]"
+	read cron
+	done
+	#channel configurations
+	echo "Your main Channels? e.g. #channel"
+	countch=0
+	eval read  channel$countch
+	ok=`eval echo 'channel'$countch`
+	while [ "$ok" == "" ]
+	do
+	echo "Channels e.g. #fubar"
+	eval read channel$countch
+	ok=`eval echo '$channel'$countch`
+	done
+	confirm=0
+	while [ "$confirm" != "y" -a "$confirm" != "n"  ]
+	do
+	echo "Other channels? [y/n]"
+	read confirm
+	done
+	while [ "$confirm" == "y" ]
+	do
+	echo "Next Channel"
+	countch=`expr $countch + 1`
+	eval read channel$countch
+	ok=`eval echo '$channel'$countch`
+	while [ "$ok" == "" ]
+	do
+	echo "Channel ?"
+	eval read channel$countch
+	ok=`eval echo '$channel'$countch`
+	done
+	confirm=0
+	while [ "$confirm" != "y" -a "$confirm" != "n" ]
+	do
+	echo "Other channel? [y/n]"
+	read confirm
+	done
+	done
+	#servers
+	echo "IRC servers e.g. irc.server.net or irc.server.net:port"
+	count=0
+	eval read server$count
+	ok=`eval echo '$server'$count`
+	while [ "$ok" == "" ]
+	do
+	echo "Server ?"
+	eval read server$count
+	ok=`eval echo '$server'$count`
+	done
+	confirm=0
+	while [ "$confirm" != "y" -a "$confirm" != "n" ]
+	do
+	echo "Other server? [y/n]"
+	read confirm
+	done
+	while [ "$confirm" == "y" ]
+	do
+	echo "Choose another server"
+	count=`expr $count + 1`
+	eval read server$count
+	ok=`eval echo '$server'$count`
+
+	while [ "$ok" == "" ]
+	do
+	echo "Server? "
+	eval read server$count
+	ok=`eval echo '$server'$count`
+	done
+
+	confirm=0
+	while [ "$confirm" != "y" -a "$confirm" != "n" ]
+	do
+	echo "Other server? [y/n]"
+	read confirm
+	done
+	done
+
+#basic modules
+	echo "loadmodule channels" >> my.conf
+	echo "set mod-path \"modules/\"" >> my.conf
+	echo "loadmodule dns" >> my.conf
+	echo "loadmodule server" >> my.conf
+	echo "loadmodule ctcp" >> my.conf
+	echo "loadmodule irc" >> my.conf
+	echo "loadmodule notes" >> my.conf
+	echo "loadmodule console" >> my.conf
+	echo "loadmodule blowfish" >> my.conf
+	echo "loadmodule uptime" >> my.conf
+	#set username
+	echo "set username \"$username\"" >> my.conf
+	#set admin
+	echo "set admin \"$username <email: $email>\"" >> my.conf
+	#set network
+	echo "set network \"$net\"" >> my.conf
+	#set time zone
+	echo "set timezone \"$zone\"" >> my.conf
+	#set user, notes and chan files
+	echo "set userfile \"$botnick.user\"" >> my.conf
+	echo "set chanfile \"$botnick.chan\"" >> my.conf
+	set "notefile \"$botnick.notes\"" >> my.conf
+	#set listen port
+	echo "listen $port all" >> my.conf
+	#set nick
+	echo "set nick \"$botnick\"" >> my.conf
+	echo "set altnick \"$botnick??\"" >> my.conf
+	#set ips (removed IPV6 support, see the announcemnet for eggdrop 1.6.16)
+	echo "set my-ip \"$ipv4\"" >> my.conf
+	echo "set my-hostname \"$vhost\"" >> my.conf
+	#set servers
+	echo "set servers {" >> my.conf
+	for (( i=0 ; i <= $count ; i++ ))
+	do
+	eval echo '$server'$i >> my.conf
+	done
+	echo "}" >> my.conf
+	#set Channel
+	for (( i=0 ; i <= $countch ; i++ ))
+	do
+	channel=`eval echo '$channel'$i`
+	echo "channel add $channel {" >> my.conf
+	echo "chanmode \"+nt\"" >> my.conf
+	echo "}" >> my.conf
+	done
+	#set log file
+	echo "logfile mcso * \"logs/$botnick.log\"" >> my.conf
+	echo "set log-time 1" >> my.conf
+	echo "set switch-logfiles-at 300" >> my.conf
+	#file stuff
+	echo "set help-path \"help/\"" >> my.conf
+	echo "set text-path \"text/\"" >> my.conf
+	echo "set temp-path \"/tmp\"" >> my.conf
+	echo "set motd \"text/motd\"" >> my.conf
+	echo "set telnet-banner \"text/banner\"" >> my.conf
+	echo "set userfile-perm 0600" >> my.conf
+	#bot stuff
+	echo "set remote-boots 2" >> my.conf
+	echo "set share-unlinks 1" >> my.conf
+	echo "set ident-timeout 5" >> my.conf
+	echo "set answer-ctcp 3" >> my.conf
+	echo "set server-cycle-wait 60" >> my.conf
+	echo "set server-timeout 60" >> my.conf
+	echo "set serverror-quit 1" >> my.conf
+	echo "set bounce-bans 1" >> my.conf
+	#tcl stuff
+	echo "source scripts/alltools.tcl" >> my.conf
+	echo "source scripts/action.fix.tcl" >> my.conf
+	echo "source scripts/userinfo.tcl" >> my.conf
+	echo "loadhelp userinfo.help" >> my.conf
+	#other stuff
+	echo "set max-notes 50" >> my.conf
+	echo "set note-life 60" >> my.conf
+	echo "set notify-onjoin 1" >> my.conf
+	echo "set console-autosave 1" >> my.conf
+	mv -i my.conf eggdrop.conf
+	logger -p warning -t tBEMS `whoami` has run eggdrop-conf
+	if [ "$cron" == "y" ]; then
+		cd $HOME/eggdrops/$BOTNAME/scripts
+		./autobotchk eggdrop.conf
+	fi
+	echo "Configuration is complete"
+	echo "Use eggdrop-launch $BOTNAME to launch your bot"
+}
+if [ "$1" = "backup" ]; then
+echo "Invalid eggdrop name"
+exit 0
+fi
+
+if [ ! -n "$1" ]; then
+	darusage
+else
+	BOTNAME=$1
+	check_root
+fi
