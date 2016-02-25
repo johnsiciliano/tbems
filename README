@@ -3,6 +3,10 @@ http://sourceforge.net/projects/tbems
 Author: John Siciliano
 E-Mail: enlightened@gmail.com
 
+This is an old toolset I wrote a long time ago that was on sourceforge.
+It mainly allowed users to install eggdrop bots by creating a central eggdrop directory, and using symlinks allowed system users to acess the same binaries with their own configs.
+
+
 Do the following things to create a working install.
 Please note pay attention to the eggdrop-base-install
 and check for errors.
