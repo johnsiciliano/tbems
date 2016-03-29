@@ -1,12 +1,8 @@
 tBEMS - the better Eggdrop Management Suite 
 Site: http://sourceforge.net/projects/tbems
-Email: enlightened@gmail.com
 Version 1.0
 		-Eggdrop-base-install
 			-Uses tar.bz2 and retrys once if download fails
-		-Eggdrop-install
-			-Fixed bug that didn't check right directory to 
-see if eggdrop was installed already
 Version 0.9 -   Eggdrop-install
 	-	Now verbosely displays the eggdrop remove
 	-	New backup system
@@ -17,8 +13,6 @@ Version 0.9 -   Eggdrop-install
 	-  Eggdrop-conf
 		-Added vhost configuration option
 		-Dies if someone attempts to configure backup
-	- Package
-	Removed CHANGELOG in favor for ChangeLog
 
 
 Version 0.8 - 	Eggdrop-launch
@@ -41,11 +35,6 @@ Version 0.8 - 	Eggdrop-launch
 		- Chowns all files in two commands instead of four.
 		- Sleeps for 3 before installing to give you a chance to cancel the process
 		
-		ALL RELEASES BEORE THIS ARE NO LONGER SUPPORTED
-		This will probably be the final beta release for a while.
-		Eventually I will get around to beta testing.
-		If any of you would like to beta test let me know.
-
 Version 0.7 - Modified eggdrop-conf
 		- Now implements eggdrop-lock
 		- Logs attempts, and is recognized by eggdrop-lock
